@@ -1,5 +1,4 @@
 import React, { useContext, useEffect, useState } from 'react'
-import DoctorInfo from '../components/DoctorInfo'
 import { useNavigate, useParams } from 'react-router-dom'
 import { AppContext } from '../context/AppContext';
 
