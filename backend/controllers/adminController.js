@@ -66,8 +66,10 @@ const addDoctor = async (req, res) => {
 const loginAdmin = async (req, res) => {
     try {
         const {email, password} = req.body
+        console.log(email, process.env.ADMIN_EMAIL);
         if(email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
-            const token = jwt.sign(email+password)
+            const token = jwt.sign(email+password, process.env.JWT_SECRET)
+            res.json({sucess: true, token})
         } else {
             res.json({success: false, message: "Email / Paswword salah, silahkan masukkan email/password yang valid"})
         }
