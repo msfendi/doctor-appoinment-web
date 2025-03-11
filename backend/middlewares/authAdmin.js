@@ -5,7 +5,7 @@ const authAdmin = async (req, res, next) => {
     try {
         
         const {authtoken} = req.headers
-        console.log(req.headers);
+
         if(!authtoken) {
             res.json({success: false, message: "Not authorized, You must sign in again"})
         }
