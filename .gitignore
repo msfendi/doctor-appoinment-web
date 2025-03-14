@@ -58,3 +58,4 @@ dump/
 # Cloudinary (if storing temporary assets locally)
 uploads/
 public/uploads/
+.qodo

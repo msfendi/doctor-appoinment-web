@@ -8,11 +8,11 @@ import jwt from 'jsonwebtoken'
 
 const addDoctor = async (req, res) => {
     try {
-        const { name, email, password, speciality, degree, experience, about, available, fees, address, date } = req.body
+        const { name, email, password, speciality, degree, experience, about, available = true, fees, address, date } = req.body
         const imageFile = req.file
 
         // checking value input
-        if (!name || !email || !password || !speciality || !degree || !experience || !about || !available || !fees || !address || !date) {
+        if (!name || !email || !password || !speciality || !degree || !experience || !about || !fees || !address) {
             console.log(req.body);  
             return res.json({success: false, message: 'Please complete the data'})
         }
@@ -62,6 +62,17 @@ const addDoctor = async (req, res) => {
 }
 
 
+// Get All Doctors to admin panel
+const allDoctors = async (req, res) => {
+    try {
+        const doctors = await doctorModel.find({}).select('-password')
+        res.json({success: true, doctors})
+    } catch (error) {
+        console.log(error);
+        res.json({success: false, message: error.message})
+    }
+}
+
 // API FOR ADMIN LOGIN
 const loginAdmin = async (req, res) => {
     try {
@@ -79,4 +90,4 @@ const loginAdmin = async (req, res) => {
     }
 } 
 
-export {addDoctor, loginAdmin}
+export {addDoctor, loginAdmin, allDoctors}

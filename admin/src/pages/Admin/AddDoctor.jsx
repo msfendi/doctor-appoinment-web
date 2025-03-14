@@ -1,49 +1,94 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { assets } from '../../assets/assets'
+import { AdminContext } from '../../context/AdminContext'
+import { toast } from 'react-toastify'
+import axios from 'axios'
 
 const AddDoctor = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    specialty: "General physician",
-    email: "",
-    education: "",
-    password: "",
-    address1: "",
-    address2: "",
-    experience: "",
-    fees: "",
-    about: "",
-  })
+
+  const [docImg, setDocImg] = useState(false)
+  const [name, setName] = useState('')
+  const [speciality, setSpeciality] = useState('General physician')
+  const [email, setEmail] = useState('')
+  const [degree, setDegree] = useState('')
+  const [password, setPassword] = useState('')
+  const [address1, setAddress1] = useState('')
+  const [address2, setAddress2] = useState('')
+  const [experience, setExperience] = useState('1 Year')
+  const [fees, setFees] = useState('')
+  const [about, setAbout] = useState('')
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
+    // setFormData((prev) => ({
+    //   ...prev,
+    //   [name]: value,
+    // }))
   }
 
-  const handleSubmit = (e) => {
+  const { backendUrl, authtoken } = useContext(AdminContext) 
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log("Form submitted:", formData)
-    // Add API call here to submit the form data
+    try {
+      if (!docImg) {
+        return toast.error('You must upload Image !')
+      }
+
+      const formData = new FormData()
+      formData.append('imageFile', docImg)
+      formData.append('name', name)
+      formData.append('speciality', speciality)
+      formData.append('email', email)
+      formData.append('degree', degree)
+      formData.append('password', password)
+      formData.append('address', JSON.stringify({line1: address1, line2: address2}))
+      formData.append('experience', experience)
+      formData.append('fees', Number(fees))
+      formData.append('about', about)
+
+      formData.forEach((value, key) => {
+        console.log(`${key} : ${value}`);
+      })
+
+      const {data} = await axios.post(backendUrl + '/api/admin/add-doctor', formData, {headers: {authtoken}})
+      if (data.success) {
+        toast.success(data.message)
+        setDocImg(false)
+        setName('')
+        setSpeciality('')
+        setEmail('')
+        setDegree('')
+        setPassword('')
+        setAddress1('')
+        setAddress2('')
+        setExperience('')
+        setFees('')
+        setAbout('')
+      } else {
+        toast.error(data.message)
+      }
+
+    } catch (error) {
+      
+    }
   }
-  
+   
   return (
     <div className="p-6 bg-[#f8f9fd]">
       <h1 className="text-xl font-semibold mb-4">Add Doctor</h1>
 
       <div className="bg-white rounded-md p-6 shadow-sm">
         <form onSubmit={handleSubmit}>
-          <div className="flex justify-start mb-6">
-            <div className="relative flex flex-row justify-start items-center">
-              <div className="w-24 h-24 bg-[#f5f5f5] rounded-full flex items-center justify-center">
-                <img src={assets.upload_area} alt="" />
-              </div>
-              <div className="text-center mt-2">
-                <p className="text-sm font-medium text-[#515151]">Upload doctor</p>
+          <div className="flex mb-6">
+            <div className="relative flex flex-row gap-4 items-center">
+              <img className="w-14 bg-[#f5f5f5] rounded-full flex items-center justify-center" src={docImg ? URL.createObjectURL(docImg) : assets.upload_area} alt="" />
+              <div className="text-start">
+                <label className="text-sm font-medium text-[#515151]" htmlFor="doc-img">Upload doctor</label>
                 <p className="text-sm text-[#8c8c8c]">picture</p>
               </div>
+              
+              <input onChange={(e) => setDocImg(e.target.files[0])} type="file" name="doc-img" id="doc-img" hidden />
             </div>
           </div>
 
@@ -58,24 +103,24 @@ const AddDoctor = () => {
                 id="name"
                 name="name"
                 placeholder="Name"
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-[#d8d8d8] rounded-md focus:outline-none focus:ring-1 focus:ring-[#5f6fff]"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-3 py-2 border text-sm border-[#d8d8d8] rounded-md focus:outline-none focus:ring-1 focus:ring-[#5f6fff]"
               />
             </div>
 
             {/* Specialty */}
             <div>
-              <label htmlFor="specialty" className="block text-sm mb-1 text-[#515151]">
+              <label htmlFor="speciality" className="block text-sm mb-1 text-[#515151]">
                 Speciality
               </label>
               <div className="relative">
                 <select
-                  id="specialty"
-                  name="specialty"
-                  value={formData.specialty}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-[#d8d8d8] rounded-md appearance-none focus:outline-none focus:ring-1 focus:ring-[#5f6fff]"
+                  id="speciality"
+                  name="speciality"
+                  value={speciality}
+                  onChange={(e) => setSpeciality(e.target.value)}
+                  className="w-full px-3 py-2 border text-sm border-[#d8d8d8] rounded-md appearance-none focus:outline-none focus:ring-1 focus:ring-[#5f6fff]"
                 >
                   <option value="General physician">General physician</option>
                   <option value="Cardiologist">Cardiologist</option>
@@ -99,25 +144,25 @@ const AddDoctor = () => {
                 id="email"
                 name="email"
                 placeholder="Your email"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-[#d8d8d8] rounded-md focus:outline-none focus:ring-1 focus:ring-[#5f6fff]"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-3 py-2 border text-sm border-[#d8d8d8] rounded-md focus:outline-none focus:ring-1 focus:ring-[#5f6fff]"
               />
             </div>
 
             {/* Education */}
             <div>
-              <label htmlFor="education" className="block text-sm mb-1 text-[#515151]">
+              <label htmlFor="degree" className="block text-sm mb-1 text-[#515151]">
                 Education
               </label>
               <input
                 type="text"
-                id="education"
-                name="education"
-                placeholder="Education"
-                value={formData.education}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-[#d8d8d8] rounded-md focus:outline-none focus:ring-1 focus:ring-[#5f6fff]"
+                id="degree"
+                name="degree"
+                placeholder="Degree"
+                value={degree}
+                onChange={(e) => setDegree(e.target.value)}
+                className="w-full px-3 py-2 border text-sm border-[#d8d8d8] rounded-md focus:outline-none focus:ring-1 focus:ring-[#5f6fff]"
               />
             </div>
 
@@ -131,9 +176,9 @@ const AddDoctor = () => {
                 id="password"
                 name="password"
                 placeholder="Password"
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-[#d8d8d8] rounded-md focus:outline-none focus:ring-1 focus:ring-[#5f6fff]"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-3 py-2 border text-sm border-[#d8d8d8] rounded-md focus:outline-none focus:ring-1 focus:ring-[#5f6fff]"
               />
             </div>
 
@@ -147,18 +192,18 @@ const AddDoctor = () => {
                 id="address1"
                 name="address1"
                 placeholder="Address 1"
-                value={formData.address1}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-[#d8d8d8] rounded-md focus:outline-none focus:ring-1 focus:ring-[#5f6fff] mb-2"
+                value={address1}
+                onChange={(e) => setAddress1(e.target.value)}
+                className="w-full px-3 py-2 border text-sm border-[#d8d8d8] rounded-md focus:outline-none focus:ring-1 focus:ring-[#5f6fff] mb-2"
               />
               <input
                 type="text"
                 id="address2"
                 name="address2"
                 placeholder="Address 2"
-                value={formData.address2}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-[#d8d8d8] rounded-md focus:outline-none focus:ring-1 focus:ring-[#5f6fff]"
+                value={address2}
+                onChange={(e) => setAddress2(e.target.value)}
+                className="w-full px-3 py-2 border text-sm border-[#d8d8d8] rounded-md focus:outline-none focus:ring-1 focus:ring-[#5f6fff]"
               />
             </div>
 
@@ -171,10 +216,9 @@ const AddDoctor = () => {
                 <select
                   id="experience"
                   name="experience"
-                  value={formData.experience}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-[#d8d8d8] rounded-md appearance-none focus:outline-none focus:ring-1 focus:ring-[#5f6fff]"
-                >
+                  value={experience}
+                  onChange={(e) => setExperience(e.target.value)}
+                  className="w-full px-3 py-2 border text-sm border-[#d8d8d8] rounded-md appearance-none focus:outline-none focus:ring-1 focus:ring-[#5f6fff]">
                   <option value="">Experience</option>
                   <option value="1-3 years">1-3 years</option>
                   <option value="3-5 years">3-5 years</option>
@@ -197,9 +241,9 @@ const AddDoctor = () => {
                 id="fees"
                 name="fees"
                 placeholder="Your fees"
-                value={formData.fees}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-[#d8d8d8] rounded-md focus:outline-none focus:ring-1 focus:ring-[#5f6fff]"
+                value={fees}
+                onChange={(e) => setFees(e.target.value)}
+                className="w-full px-3 py-2 border text-sm border-[#d8d8d8] rounded-md focus:outline-none focus:ring-1 focus:ring-[#5f6fff]"
               />
             </div>
           </div>
@@ -213,10 +257,10 @@ const AddDoctor = () => {
               id="about"
               name="about"
               placeholder="write about yourself"
-              value={formData.about}
-              onChange={handleChange}
+              value={about}
+              onChange={(e) => setAbout(e.target.value)}
               rows="5"
-              className="w-full px-3 py-2 border border-[#d8d8d8] rounded-md focus:outline-none focus:ring-1 focus:ring-[#5f6fff]"
+              className="w-full px-3 py-2 border text-sm border-[#d8d8d8] rounded-md focus:outline-none focus:ring-1 focus:ring-[#5f6fff]"
             ></textarea>
           </div>
 

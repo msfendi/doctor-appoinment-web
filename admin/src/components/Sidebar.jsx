@@ -45,10 +45,10 @@ const Sidebar = () => {
   ]
 
   return (
-    <div className="w-[250px] min-h-screen bg-white border-r border-[#e1e1e1] flex flex-col">
+    <div className="min-h-screen bg-white border-r border-[#e1e1e1] flex flex-col">
 
       {/* Use NavMain component */}
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1">
         <NavMain items={navItems} onClick={(item) => setActiveNav(item.title)} />
       </div>
 
